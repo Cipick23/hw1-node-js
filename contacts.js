@@ -1,67 +1,103 @@
-import fs from "node:fs/promises";
+import fs from "fs/promises";
 import * as path from "node:path";
-import colors from "colors";
-import { dirname } from "path";
 import { fileURLToPath } from "url";
-import { readFile } from "node:fs";
-import { randomUUID } from "node:crypto";
+import colors from "colors";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const contactsPath = `${__dirname}//db//contacts.json`;
-console.log(contactsPath);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const dbFolderPath = path.join(__dirname, "db");
+const contactsPath = path.join(dbFolderPath, "contacts.json");
 
-// CRUD
-getContacts();
-
-// Read
-async function getContacts() {
+async function listContacts() {
   try {
     console.log("GET Contacts".bgBlue);
-    const contents = await readFile(contactsPath, { encoding: "utf8" });
-    // const contacts = JSON.parse(contents);
-    console.table(contents);
-    console.log(contents.length);
-  } catch (error) {
-    console.log("There is an error".bgRed.white);
-    console.error(error);
+
+    const data = await fs.readFile(contactsPath, { encoding: "utf8" });
+    const contacts = JSON.parse(data);
+
+    console.table(contacts); // Afiseaza lista de contacte sub forma de tabel
+
+    return contacts; // Returnează lista de contacte pentru utilizări ulterioare
+  } catch (err) {
+    console.error("Error reading file:", err);
+    throw err;
   }
 }
 
-// Create
-/*
-    {
-      "name": "Nike Air Max - Blue/Royal Purple",
-      "size": 46,
-      "type": "shoe"
+async function getContactById(contactId) {
+  try {
+    const data = await fs.readFile(contactsPath, { encoding: "utf8" });
+    const contacts = JSON.parse(data);
+
+    console.log(`GET Contact with ID ${contactId}`.bgBlue); // Confirmare că funcția este apelată
+
+    const contact = contacts.find((c) => c.id === contactId);
+
+    if (!contact) {
+      throw new Error(`Contact with ID ${contactId} not found.`);
     }
-  */
-// export async function createProduct(product) {
-//   try {
-//     const contents = await readFile(contactsPath, { encoding: "utf8" });
-//     const contacts = JSON.parse(contents);
-//     const newContactId = randomUUID();
-//     const isValid = contact?.name && contact?.email && contact?.phone;
-//     if (!isValid) {
-//       throw new Error("The product does not have all required parameters!");
-//     }
-//     const newContact = {
-//       id: newContactId,
-//       ...contact,
-//     };
 
-//     contacts.push(newContact);
-//     const parsedContacts = JSON.stringify(contacts);
-//     await writeFile(contactsPath, parsedContacts);
+    console.log(contact); // Afișează detaliile contactului găsit
 
-//     console.log("The product has been created succesfully".bgGreen);
-//   } catch (error) {
-//     console.log("There is an error".bgRed.white);
-//     console.error(error);
-//   }
-// }
+    return contact;
+  } catch (error) {
+    console.error("Error getting contact:", error);
+    throw error;
+  }
+}
 
-// Update
+async function removeContact(contactId) {
+  try {
+    let data = await fs.readFile(contactsPath, { encoding: "utf8" });
+    let contacts = JSON.parse(data);
 
-// Delete
+    // Filtrăm lista de contacte pentru a elimina contactul cu ID-ul dat
+    const filteredContacts = contacts.filter((c) => c.id !== contactId);
 
-// https://immerjs.github.io/immer/update-patterns/
+    if (contacts.length === filteredContacts.length) {
+      throw new Error(`Contact with ID ${contactId} not found.`);
+    }
+
+    // Suprascriem fișierul cu lista actualizată de contacte (fără contactul eliminat)
+    await fs.writeFile(contactsPath, JSON.stringify(filteredContacts, null, 2));
+
+    console.log(`Contact with ID ${contactId} removed successfully.`);
+  } catch (error) {
+    console.error("Error removing contact:", error);
+    throw error;
+  }
+}
+
+async function addContact(name, email, phone) {
+  try {
+    console.log("CREATE Contact".bgBlue);
+
+    const data = await fs.readFile(contactsPath, { encoding: "utf8" });
+    const contacts = JSON.parse(data);
+
+    const newContactId = randomUUID();
+
+    const newContact = {
+      id: newContactId,
+      name,
+      email,
+      phone,
+    };
+
+    contacts.push(newContact);
+    await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
+
+    console.log("New contact added:");
+    console.table([newContact]); // Afișează detaliile noului contact adăugat
+
+    console.log("Contact created successfully".bgGreen);
+
+    return newContact; // Returnăm noul contact adăugat pentru utilizare ulterioară
+  } catch (error) {
+    console.log("Error creating contact:".bgRed.white);
+    console.error(error);
+    throw error;
+  }
+}
+
+export { listContacts, getContactById, addContact, removeContact };
