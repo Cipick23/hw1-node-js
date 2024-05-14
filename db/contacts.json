@@ -60,12 +60,6 @@
     "phone": "(748) 206-2688"
   },
   {
-    "id": "363461e6-5c8c-485a-bacc-39b648f2e13a",
-    "name": "Kyle",
-    "email": "Kyle.in@egetlacus.ca",
-    "phone": "(544) 451-7038"
-  },
-  {
     "id": "141f7f0c-c560-426a-a800-4eac36bc99f3",
     "name": "Mango",
     "email": "mango@gmail.com",
@@ -88,5 +82,11 @@
     "name": "Terry",
     "email": "mango@gmail.com",
     "phone": "322-22-00"
+  },
+  {
+    "id": "a50570ac-7536-4aae-b9b1-bea202649a56",
+    "name": "Mango",
+    "email": "mango@gmail.com",
+    "phone": "322-22-55"
   }
 ]

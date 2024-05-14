@@ -2,6 +2,7 @@ import fs from "fs/promises";
 import * as path from "node:path";
 import { fileURLToPath } from "url";
 import colors from "colors";
+import { v4 as uuidv4 } from "uuid"; // Importă funcția uuidv4
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -37,7 +38,7 @@ async function getContactById(contactId) {
       throw new Error(`Contact with ID ${contactId} not found.`);
     }
 
-    console.log(contact); // Afișează detaliile contactului găsit
+    console.table(contact);
 
     return contact;
   } catch (error) {
@@ -61,7 +62,7 @@ async function removeContact(contactId) {
     // Suprascriem fișierul cu lista actualizată de contacte (fără contactul eliminat)
     await fs.writeFile(contactsPath, JSON.stringify(filteredContacts, null, 2));
 
-    console.log(`Contact with ID ${contactId} removed successfully.`);
+    console.log(`Contact with ID ${contactId} removed successfully.`.bgGreen);
   } catch (error) {
     console.error("Error removing contact:", error);
     throw error;
@@ -75,7 +76,7 @@ async function addContact(name, email, phone) {
     const data = await fs.readFile(contactsPath, { encoding: "utf8" });
     const contacts = JSON.parse(data);
 
-    const newContactId = randomUUID();
+    const newContactId = uuidv4();
 
     const newContact = {
       id: newContactId,
